@@ -1,0 +1,236 @@
+/* Venore NestPro — porta a identidade visual do NestPro original (nestpro/app/globals.css +
+   nestpro/venore/venore.css) para o vocabulário de tokens do Venore Docks.
+
+   Cores (--background/--foreground/--card/--primary/... e --disc-color-*) são as MESMAS da
+   instância de produção do NestPro, só reescritas de hsl(h s% l%) explícito (idêntico, não
+   convertido) — é a parte que precisa ficar "visualmente igual", pedido explícito da migração.
+
+   Raio/motion/tipografia/altura-de-controle o NestPro original nunca teve como token dedicado
+   (usava default do Tailwind) — aqui herdam os valores do Venore Slime (fallback do sistema) por
+   não haver equivalente a portar; só --radius muda pra bater com o `--radius: 0.6rem` original.
+
+   [data-theme="nestpro"] no <html> ativa o bloco base; .dark também vive no <html> (nunca
+   aninhado), por isso a variante escura é o seletor composto abaixo. */
+
+[data-theme="nestpro"] {
+  --radius: 0.6rem;
+  --radius-shell: 0rem;
+  --radius-panel: 0.6rem;
+  --ui-radius-scale-sm: 0.6;
+  --ui-radius-scale-md: 1;
+  --ui-radius-scale-lg: 1.7;
+  --ui-radius-scale-xl: 2.4;
+  --ui-radius-scale-2xl: 3;
+  --ui-radius-scale-3xl: 3.6;
+  --ui-radius-scale-4xl: 4.2;
+
+  --ui-tracking-caps: 0.1em;
+
+  --ui-motion-fast: 150ms;
+  --ui-motion-base: 200ms;
+  --ui-motion-slow: 300ms;
+  --ui-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ui-ease-emphasis: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --ui-font-weight-body: 400;
+  --ui-font-weight-medium: 500;
+  --ui-font-weight-semibold: 600;
+  --ui-font-weight-display: 700;
+  --ui-leading-copy: 1.5;
+  --ui-leading-display: 1.15;
+  --ui-tracking-copy: 0em;
+  --ui-tracking-display: -0.01em;
+
+  --ui-control-height-xs: 1.75rem;
+  --ui-control-height-sm: 2.25rem;
+  --ui-control-height-md: 2.5rem;
+  --ui-control-height-lg: 2.75rem;
+  --ui-control-padding-x: 1.125rem;
+  --ui-button-padding-scale-xs: 0.5;
+  --ui-button-padding-scale-sm: 0.72;
+  --ui-button-padding-scale-lg: 1.9;
+  --ui-button-gap: 0.5rem;
+
+  --ui-panel-padding-x: 1.5rem;
+  --ui-panel-padding-y: 1.5rem;
+
+  /* base shadcn — nestpro/app/globals.css :root, valor idêntico */
+  --background: hsl(235 15% 94%);
+  --foreground: hsl(235 5% 15%);
+  --card: hsl(235 15% 97%);
+  --card-foreground: hsl(235 5% 15%);
+  --popover: hsl(235 10% 85%);
+  --popover-foreground: hsl(235 5% 15%);
+  --primary: hsl(235 25% 30%);
+  --primary-foreground: hsl(235 18% 93%);
+  --secondary: hsl(235 10% 90%);
+  --secondary-foreground: hsl(235 5% 15%);
+  --muted: hsl(235 12% 30%);
+  --muted-foreground: hsl(235 9% 50%);
+  --accent: hsl(235 22% 75%);
+  --accent-foreground: hsl(235 5% 100%);
+  --destructive: hsl(346 67% 41%);
+  --destructive-foreground: hsl(346 50% 91%);
+  --border: hsl(235 25% 30%);
+  --input: hsl(235 30% 18%);
+  --ring: hsl(235 48% 42%);
+
+  --shadow-color: hsl(235 15% 40%);
+  --shadow-color-strong: hsl(235 15% 20%);
+  --shadow-color-soft: color-mix(in oklch, var(--shadow-color) 20%, transparent);
+  --shadow-color-strong-soft: color-mix(in oklch, var(--shadow-color-strong) 20%, transparent);
+  --shadow-panel: 0 1px 2px -1px var(--shadow-color-strong-soft), 0 10px 26px -14px var(--shadow-color-soft);
+  --shadow-float: 0 2px 6px -2px var(--shadow-color-strong-soft), 0 16px 34px -14px var(--shadow-color-strong-soft);
+  --shadow-header: 0 1px 0 0 var(--border);
+
+  /* sidebar — largura aproxima nestpro/venore/venore.css (.leftbar-expanded lg:w-[12rem],
+     .leftbar-collapsed lg:w-[4.4rem]); cor única (sem troca de cor ao colapsar como o original —
+     o Shell reaproveitado do Venore Slime não tem esse comportamento). */
+  --sidebar-width-expanded: 12rem;
+  --sidebar-width-collapsed: 4.4rem;
+
+  --sidebar-bg-start: hsl(235 15% 96%);
+  --sidebar-bg-end: hsl(235 12% 92%);
+  --sidebar-bg: linear-gradient(180deg, var(--sidebar-bg-start) 0%, var(--sidebar-bg-end) 100%);
+  --sidebar-bg-admin-start: hsl(235 20% 32%);
+  --sidebar-bg-admin-end: hsl(235 20% 26%);
+  --sidebar-bg-admin: linear-gradient(180deg, var(--sidebar-bg-admin-start) 0%, var(--sidebar-bg-admin-end) 100%);
+
+  /* status semântico — nestpro/app/globals.css --warning/--info (info não existe no vocabulário
+     shadcn do Docks; aproximado por --success) */
+  --warning: hsl(39 100% 48%);
+  --warning-foreground: hsl(21 82% 93%);
+  --warning-soft: color-mix(in oklch, var(--warning) 12%, var(--card));
+  --warning-border: color-mix(in oklch, var(--warning) 28%, var(--border));
+
+  --success: hsl(235 48% 42%);
+  --success-foreground: hsl(0 0% 100%);
+  --success-soft: color-mix(in oklch, var(--success) 12%, var(--card));
+  --success-border: color-mix(in oklch, var(--success) 28%, var(--border));
+
+  --chart-1: hsl(253 91% 58%);
+  --chart-2: hsl(253 5% 89%);
+  --chart-3: hsl(253 12% 82%);
+  --chart-4: hsl(253 5% 92%);
+  --chart-5: hsl(253 94% 58%);
+  --chart-6: hsl(198 100% 45%);
+  --chart-7: hsl(340 70% 40%);
+
+  /* cores por letra DISC (nestpro/app/globals.css --disc-*) — o plugin @venore/plugin-disc já usa
+     estes valores como fallback; aqui ficam explícitos pra qualquer site com este tema ativo. */
+  --disc-color-d: hsl(340 70% 40%);
+  --disc-color-i: hsl(40 100% 48%);
+  --disc-color-s: hsl(150 70% 40%);
+  --disc-color-c: hsl(198 100% 45%);
+  --disc-color-d-interna: hsl(340 70% 60%);
+  --disc-color-i-interna: hsl(40 50% 80%);
+  --disc-color-s-interna: hsl(150 70% 80%);
+  --disc-color-c-interna: hsl(198 50% 80%);
+
+  --overlay-foreground: hsl(0 0% 100%);
+
+  --presentation-ground: hsl(235 15% 10%);
+  --presentation-card: hsl(235 15% 17%);
+  --presentation-border: hsl(220 50% 40%);
+  --presentation-foreground: hsl(235 12% 85%);
+  --presentation-muted-foreground: hsl(235 15% 60%);
+  --presentation-success: hsl(235 75% 58%);
+  --presentation-success-soft: color-mix(in oklch, var(--presentation-success) 16%, var(--presentation-card));
+  --presentation-success-border: color-mix(in oklch, var(--presentation-success) 34%, var(--presentation-border));
+  --presentation-warning: hsl(40 100% 60%);
+  --presentation-warning-soft: color-mix(in oklch, var(--presentation-warning) 16%, var(--presentation-card));
+  --presentation-warning-border: color-mix(in oklch, var(--presentation-warning) 34%, var(--presentation-border));
+  --presentation-destructive: hsl(0 100% 30%);
+  --presentation-renewed: hsl(198 100% 45%);
+  --presentation-new: hsl(340 70% 40%);
+
+  /* identidade — fundo do app quase plano, papel "anti-flash white" (idêntico ao --background) */
+  --app-bg-start: hsl(235 15% 95%);
+  --app-bg-mid: hsl(235 14% 94%);
+  --app-bg-end: hsl(235 13% 93%);
+  --app-background: linear-gradient(180deg, var(--app-bg-start) 0%, var(--app-bg-mid) 55%, var(--app-bg-end) 100%);
+
+  --header-bg: hsl(235 15% 97%);
+  --header-chip-bg: color-mix(in oklch, var(--muted) 20%, var(--card));
+  --header-avatar-bg: color-mix(in oklch, var(--accent) 26%, var(--card));
+  --header-avatar-fg: var(--foreground);
+  --header-border-subtle: var(--border);
+  --header-border-strong: var(--ring);
+}
+
+[data-theme="nestpro"].dark {
+  /* base shadcn — nestpro/app/globals.css .dark, valor idêntico */
+  --background: hsl(235 15% 10%);
+  --foreground: hsl(235 12% 85%);
+  --card: hsl(235 15% 17%);
+  --card-foreground: hsl(235 5% 98%);
+  --popover: hsl(235 10% 12%);
+  --popover-foreground: hsl(235 5% 98%);
+  --primary: hsl(235 48% 42%);
+  --primary-foreground: hsl(235 5% 98%);
+  --secondary: hsl(235 10% 15%);
+  --secondary-foreground: hsl(235 5% 98%);
+  --muted: hsl(235 30% 20%);
+  --muted-foreground: hsl(235 15% 40%);
+  --accent: hsl(235 15% 15%);
+  --accent-foreground: hsl(235 5% 98%);
+  --destructive: hsl(0 100% 30%);
+  --destructive-foreground: hsl(235 5% 98%);
+  --border: hsl(220 50% 40%);
+  --input: hsl(235 30% 18%);
+  --ring: hsl(235 75% 58%);
+
+  --shadow-color: hsl(0 0% 0%);
+  --shadow-color-strong: hsl(0 0% 0%);
+  --shadow-color-soft: color-mix(in oklch, var(--shadow-color) 44%, transparent);
+  --shadow-color-strong-soft: color-mix(in oklch, var(--shadow-color-strong) 40%, transparent);
+  --shadow-panel: 0 1px 2px -1px var(--shadow-color-strong-soft), 0 12px 28px -14px var(--shadow-color-soft);
+  --shadow-float: 0 2px 6px -2px var(--shadow-color-strong-soft), 0 18px 38px -16px var(--shadow-color-strong-soft);
+  --shadow-header: 0 1px 0 0 var(--border);
+
+  --sidebar-bg-start: hsl(235 15% 13%);
+  --sidebar-bg-end: hsl(235 15% 9%);
+  --sidebar-bg: linear-gradient(180deg, var(--sidebar-bg-start) 0%, var(--sidebar-bg-end) 100%);
+  --sidebar-bg-admin-start: hsl(235 40% 20%);
+  --sidebar-bg-admin-end: hsl(235 40% 15%);
+  --sidebar-bg-admin: linear-gradient(180deg, var(--sidebar-bg-admin-start) 0%, var(--sidebar-bg-admin-end) 100%);
+
+  --warning: hsl(40 100% 60%);
+  --warning-foreground: hsl(235 15% 10%);
+  --warning-soft: color-mix(in oklch, var(--warning) 16%, var(--card));
+  --warning-border: color-mix(in oklch, var(--warning) 32%, var(--border));
+
+  --success: hsl(235 75% 58%);
+  --success-foreground: hsl(235 75% 94%);
+  --success-soft: color-mix(in oklch, var(--success) 16%, var(--card));
+  --success-border: color-mix(in oklch, var(--success) 32%, var(--border));
+
+  --chart-1: hsl(220 70% 50%);
+  --chart-2: hsl(160 60% 45%);
+  --chart-3: hsl(30 80% 55%);
+  --chart-4: hsl(280 65% 60%);
+  --chart-5: hsl(340 75% 55%);
+  --chart-6: hsl(198 100% 45%);
+  --chart-7: hsl(340 70% 40%);
+
+  --disc-color-d: hsl(340 70% 40%);
+  --disc-color-i: hsl(40 100% 48%);
+  --disc-color-s: hsl(150 70% 40%);
+  --disc-color-c: hsl(198 100% 45%);
+  --disc-color-d-interna: hsl(340 50% 80%);
+  --disc-color-i-interna: hsl(40 50% 80%);
+  --disc-color-s-interna: hsl(150 70% 80%);
+  --disc-color-c-interna: hsl(198 50% 80%);
+
+  --app-bg-start: hsl(235 15% 9%);
+  --app-bg-mid: hsl(235 15% 8%);
+  --app-bg-end: hsl(235 15% 7%);
+  --app-background: linear-gradient(180deg, var(--app-bg-start) 0%, var(--app-bg-mid) 55%, var(--app-bg-end) 100%);
+
+  --header-bg: hsl(235 15% 12%);
+  --header-chip-bg: color-mix(in oklch, var(--muted) 30%, var(--card));
+  --header-avatar-bg: color-mix(in oklch, var(--accent) 26%, var(--card));
+  --header-avatar-fg: var(--foreground);
+  --header-border-subtle: var(--border);
+  --header-border-strong: var(--ring);
+}
