@@ -1,4 +1,5 @@
 import type { HeaderBrand } from "@venore/theme-sdk";
+import { isRecolorableBrandAsset } from "@venore/theme-sdk/ui";
 
 // Capacidade portada de PlatformBrand do protótipo (venore-docks) — modo texto/svg/png, variante
 // scrolled, posição. Dimensionamento reescrito: em vez dos 4 números mágicos px do protótipo
@@ -53,7 +54,7 @@ export function PlatformBrand({
         ["--brand-scale-scrolled" as string]: scrolledSize / size,
       }}
     >
-      {mode === "svg" ? (
+      {mode === "svg" && isRecolorableBrandAsset(logoUrl) ? (
         <span
           aria-label={name}
           role="img"
