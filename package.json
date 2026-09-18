@@ -1,6 +1,6 @@
 {
   "name": "@venore/theme-nestpro",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "NestPro — tema do Venore Docks, porta a identidade visual do NestPro original.",
   "private": true,
   "type": "module",
