@@ -1,10 +1,12 @@
 {
   "name": "@venore/theme-nestpro",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "NestPro — refatoração parcial: cópia do Venore Slime (mesmo Shell), matiz azul \"Delft blue\" em vez de verde.",
   "private": true,
   "type": "module",
-  "sideEffects": ["*.css"],
+  "sideEffects": [
+    "*.css"
+  ],
   "exports": {
     ".": "./index.ts",
     "./manifest": "./manifest.ts",
