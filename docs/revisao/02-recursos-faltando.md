@@ -3,7 +3,7 @@
 Revisão de 27/09/2026 sobre `main` @ `d9c3cdb`, comparada ao core `venore-docks` v0.6.0.
 Legenda: **[CERTAIN]** verificado · **[LIKELY]** inferência · **[UNCERTAIN]** hipótese.
 
-Documentos irmãos: [1. Problemas](01-problemas.md) · [3. Melhorias de UX](03-melhorias-ux.md).
+Documentos irmãos: [1. Problemas](01-problemas.md) · [3. Melhorias de UX](03-melhorias-ux.md) · [4. O que foi implementado](04-implementacao.md).
 
 | # | Prioridade | Recurso | Por que faz falta | Como poderia ser | Confiança |
 |---|---|---|---|---|---|

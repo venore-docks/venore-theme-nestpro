@@ -10,7 +10,7 @@ Legenda de confiança: **[CERTAIN]** verificado no código · **[LIKELY]** infer
 do código · **[UNCERTAIN]** hipótese que precisa de teste no navegador.
 
 Documentos irmãos: [2. Recursos faltando](02-recursos-faltando.md) ·
-[3. Melhorias de UX](03-melhorias-ux.md).
+[3. Melhorias de UX](03-melhorias-ux.md) · [4. O que foi implementado](04-implementacao.md).
 
 ## Resumo
 

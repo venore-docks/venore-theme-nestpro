@@ -4,7 +4,7 @@ Revisão de 27/09/2026 sobre `main` @ `d9c3cdb`. Leitura de código, sem teste e
 itens visuais trazem a confiança marcada.
 Legenda: **[CERTAIN]** verificado · **[LIKELY]** inferência · **[UNCERTAIN]** hipótese.
 
-Documentos irmãos: [1. Problemas](01-problemas.md) · [2. Recursos faltando](02-recursos-faltando.md).
+Documentos irmãos: [1. Problemas](01-problemas.md) · [2. Recursos faltando](02-recursos-faltando.md) · [4. O que foi implementado](04-implementacao.md).
 
 | # | Impacto | Onde | Situação atual | Melhoria proposta | Confiança |
 |---|---|---|---|---|---|
