@@ -8,11 +8,12 @@
 // Compartilhado entre SidebarNavLink (item de nav) e o botão de alternância site/admin — os dois
 // elementos interativos precisam da classe `group/sidebar-collapse-target` pra este seletor
 // funcionar (Tailwind `group-[...]/<nome>:` lê o estado do ancestral com esse nome de grupo).
-// max-w-[180px]: ver comentário em SidebarNavLink.tsx sobre de onde esse número vem (não é um
-// valor solto — é o espaço que sobra dentro de --sidebar-width-expanded depois do padding do
-// frame, do padding do item e do ícone+gap, pixel a pixel igual ao protótipo de referência).
+// Largura máxima do rótulo derivada de --sidebar-width-expanded (não um número solto): tira o
+// padding do frame (px-5 ×2 = 2.5rem), o do item (px-3 ×2 = 1.5rem) e ícone+gap (2rem), mais uma
+// folga de 0.25rem — 17.5rem − 6.25rem = 11.25rem (180px) com a largura atual, e acompanha se o
+// tema mudar a largura da sidebar.
 export const SIDEBAR_COLLAPSE_TOOLTIP_LABEL_CLASSES =
-  "overflow-hidden whitespace-nowrap max-w-[180px] translate-x-0 opacity-100 ui-motion-emphasis";
+  "overflow-hidden whitespace-nowrap max-w-[calc(var(--sidebar-width-expanded)-6.25rem)] translate-x-0 opacity-100 ui-motion-emphasis";
 
 export const SIDEBAR_COLLAPSE_TOOLTIP_COLLAPSED_CLASSES =
   "lg:pointer-events-none lg:max-w-0 lg:-translate-x-2 lg:opacity-0 " +

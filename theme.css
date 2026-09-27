@@ -1,18 +1,20 @@
-/* Venore NestPro — refatoração PARCIAL desta sessão (pedido explícito): cópia do Venore Slime
-   (mesmos valores de L/C — raio, motion, tipografia, sombra em duas camadas, fundo quase plano),
-   só com o matiz da marca girado pro azul (~235, "Delft blue" — a identidade original do NestPro
-   antes deste reskin, hsl(235 25% 30%)) em vez do verde do Slime. Fórmula, não cópia de valor:
-   background/card/primary/secondary/muted/accent/border/shadow/sidebar/app-bg/header seguem a
-   MESMA estrutura do Slime, hue trocado. Shell (componentes) continua idêntico ao Slime — não é
-   reescrito, só a cor muda (por isso "parcial", diferente dos outros 5 temas desta sessão).
+/* Venore NestPro — derivado do Venore Slime (mesmos valores de L/C — raio, motion, tipografia,
+   sombra em duas camadas, fundo quase plano), com o matiz da marca girado pro azul (~235,
+   "Delft blue" — a identidade original do NestPro, hsl(235 25% 30%)) em vez do verde do Slime.
+   Fórmula, não cópia de valor: background/card/primary/secondary/muted/accent/border/shadow/
+   sidebar/app-bg/header seguem a MESMA estrutura do Slime, hue trocado. O Shell (components/)
+   também parte do Slime — ver README, "Relação com o Venore Slime".
 
    --success recebe um verde de verdade (hue 145, distinto do azul de marca) em vez de seguir o
    azul — mesmo racional que o Slime já documenta pro próprio --success ("hue distinto de
    --primary pra não se confundir"), só que aqui a distância precisa ser maior porque o Slime é
    verde-sobre-verde (8° de diferença) e aqui seria azul-sobre-azul se eu só girasse tudo igual.
-   chart-2 também sai do azul (ia colidir com --primary) pra um âmbar quente, contraste real.
+   chart-2 e chart-6 também saem do azul (colidiriam com --primary/chart-1): chart-2 vai pra um
+   âmbar quente (55) e chart-6 pra um teal (190), matizes bem separados do azul de marca.
 
-   Regra desta sessão (mesma do Aurora): o modo CLARO é mais colorido/saturado que o escuro.
+   Regra de cor (mesma do Aurora): o modo CLARO é mais colorido/saturado que o escuro — exceto o
+   --accent claro, mantido com croma baixo (0.055) porque é fundo de destaque atrás de texto e, com
+   croma alto, o azul dominava a página inteira.
 
    [data-theme="nestpro"] no <html> ativa o bloco base; .dark também vive no <html> (nunca
    aninhado), por isso a variante escura é o seletor composto abaixo. */
@@ -61,7 +63,7 @@
 
   /* base shadcn — mesma estrutura do Slime (off-white de papel, cards em branco puro), matiz
      azul (235) em vez de verde (158). Chroma do --primary maior aqui do que no .dark, de
-     propósito (regra desta sessão). */
+     propósito (regra de cor do topo do arquivo). */
   --background: oklch(0.986 0.003 235);
   --foreground: oklch(0.24 0.018 235);
   --card: oklch(1 0 0);
@@ -74,7 +76,7 @@
   --secondary-foreground: oklch(0.28 0.018 235);
   --muted: oklch(0.955 0.006 235);
   --muted-foreground: oklch(0.475 0.022 235);
-  --accent: oklch(0.88 0.09 235);
+  --accent: oklch(0.9 0.055 235);
   --accent-foreground: oklch(0.28 0.03 235);
   --destructive: oklch(0.55 0.19 27);
   --destructive-foreground: oklch(0.99 0.012 27);
@@ -116,15 +118,15 @@
   --chart-3: var(--muted-foreground);
   --chart-4: var(--warning);
   --chart-5: var(--destructive);
-  --chart-6: oklch(0.58 0.16 235);
+  --chart-6: oklch(0.58 0.11 190);
   --chart-7: oklch(0.6 0.18 350);
 
   --overlay-foreground: oklch(1 0 0);
 
   /* cores por letra DISC (@venore/plugin-disc usa estas como fallback) — convenção fixa do
      modelo DISC (D=vermelho/dominância, I=amarelo/influência, S=verde/estabilidade,
-     C=azul/conformidade), não seguem o matiz de marca do tema. Preservadas intactas desta
-     refatoração — são funcionais pro plugin, não decoração. */
+     C=azul/conformidade), não seguem o matiz de marca do tema — são funcionais pro plugin, não
+     decoração. */
   --disc-color-d: hsl(340 70% 40%);
   --disc-color-i: hsl(40 100% 48%);
   --disc-color-s: hsl(150 70% 40%);
@@ -237,7 +239,7 @@
   --chart-3: var(--muted-foreground);
   --chart-4: var(--warning);
   --chart-5: var(--destructive);
-  --chart-6: oklch(0.62 0.17 235);
+  --chart-6: oklch(0.68 0.11 190);
   --chart-7: oklch(0.64 0.18 350);
 
   --app-bg-start: oklch(0.162 0.013 235);
@@ -261,4 +263,23 @@
   --header-avatar-fg: var(--foreground);
   --header-border-subtle: var(--border);
   --header-border-strong: var(--ring);
+}
+
+/* Impressão: só o conteúdo. A casca (header, sidebar, rodapé, trilha, link de pular — regiões
+   marcadas com data-shell-region nos componentes) some e o fundo vira papel branco: conteúdo
+   institucional é impresso com frequência. */
+@media print {
+  [data-theme="nestpro"],
+  [data-theme="nestpro"].dark {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0 0 0);
+    --muted-foreground: oklch(0.35 0 0);
+    --app-background: none;
+  }
+
+  [data-theme="nestpro"] [data-shell-region] {
+    display: none !important;
+  }
 }

@@ -1,6 +1,9 @@
 import type { ContentSlotProps } from "@venore/theme-sdk";
 import { Breadcrumbs } from "./Breadcrumbs";
 
+// Alvo do link "Pular para o conteúdo" (Shell.tsx).
+export const MAIN_CONTENT_ID = "conteudo";
+
 export function ContentSlot({
   children,
   sidebarContextualEnabled,
@@ -18,8 +21,8 @@ export function ContentSlot({
           showSidebar ? "flex-col lg:flex-row" : ""
         }`}
       >
-        <main className="min-w-0 flex-1 text-foreground">{children}</main>
-        {showSidebar && <aside className="w-full shrink-0 text-foreground lg:w-72">{sidebarContextual}</aside>}
+        <main id={MAIN_CONTENT_ID} tabIndex={-1} className="min-w-0 flex-1 text-foreground outline-none">{children}</main>
+        {showSidebar && <aside data-shell-region="sidebar-contextual" className="w-full shrink-0 text-foreground lg:w-72">{sidebarContextual}</aside>}
       </div>
     </div>
   );

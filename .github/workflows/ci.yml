@@ -1,0 +1,36 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: venore-theme-nestpro
+
+      # O tema compila e testa contra o core (é de lá que vêm @venore/theme-sdk, react e next).
+      - uses: actions/checkout@v4
+        with:
+          repository: venore-docks/venore-docks
+          ref: main
+          path: venore-docks
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: venore-docks/package-lock.json
+
+      - name: Instalar dependências do core
+        working-directory: venore-docks
+        run: npm ci --ignore-scripts
+
+      - name: Typecheck, lint e testes
+        working-directory: venore-theme-nestpro
+        env:
+          CORE_DIR: ../venore-docks
+        run: scripts/check-with-core.sh

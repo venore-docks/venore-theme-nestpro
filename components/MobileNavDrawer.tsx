@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@venore/theme-sdk/ui";
@@ -13,6 +13,21 @@ const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), [tabindex]:not([tab
 // coluna estática sempre visível, e prender o foco nela seria errado.
 const OFF_CANVAS_MEDIA_QUERY = "(min-width: 1024px)";
 
+// true = abaixo de `lg` (painel é off-canvas). No servidor não há viewport: assume desktop, pra
+// o HTML inicial nunca sair com `inert` numa sidebar que no desktop é a coluna fixa visível.
+function subscribeToDesktopQuery(onChange: () => void) {
+  const query = window.matchMedia(OFF_CANVAS_MEDIA_QUERY);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+}
+function useIsOffCanvas() {
+  return useSyncExternalStore(
+    subscribeToDesktopQuery,
+    () => !window.matchMedia(OFF_CANVAS_MEDIA_QUERY).matches,
+    () => false,
+  );
+}
+
 // Envolve o conteúdo (nav + toggle admin) já montado pelo SidebarLeftSlot (server component) —
 // só a casca que decide overlay/posição/Escape é client. Abaixo de lg vira off-canvas fechado
 // por padrão; a partir de lg os estilos de drawer são neutralizados e ela volta a ser a coluna
@@ -22,6 +37,14 @@ export function MobileNavDrawer({ children, asideClassName }: { children: ReactN
   const panelRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const isFirstRender = useRef(true);
+  const isOffCanvas = useIsOffCanvas();
+
+  // Janela passou pra `lg` com o drawer aberto (girar o tablet, redimensionar): o backdrop some
+  // por `lg:hidden`, mas `isOpen` e a trava de scroll do body continuavam ativos — a página ficava
+  // sem rolar no desktop e sem nada visível pra fechar. Fecha ao virar desktop.
+  useEffect(() => {
+    if (!isOffCanvas && isOpen) closeMobileNav();
+  }, [isOffCanvas, isOpen]);
 
   // `isOpen` vive num store externo ao módulo (mobile-nav-store.ts), não resetado por navegação
   // client-side (SPA) — sobrevive normalmente entre páginas. SidebarNavLink não fecha o drawer no
@@ -29,16 +52,15 @@ export function MobileNavDrawer({ children, asideClassName }: { children: ReactN
   // Sem isto, navegar por um link de dentro do drawer aberto deixava `isOpen` preso em `true`: o
   // botão-backdrop abaixo (fixed inset-0 z-40) continuava montado em toda página seguinte, abaixo
   // de `lg`, engolindo todo clique da UI real por trás dele — bug real, "nada acontece" ao tocar
-  // em qualquer botão, sem erro nenhum. Fecha sempre que a rota muda enquanto aberto; ignora o
-  // próprio mount (não fecha um drawer que acabou de abrir por causa da primeira renderização
-  // desta página).
+  // em qualquer botão, sem erro nenhum (achado: /admin/media, mas afeta qualquer página). Fecha
+  // sempre que a rota muda enquanto aberto; ignora o próprio mount (não fecha um drawer que acabou
+  // de abrir por causa da primeira renderização desta página).
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
       return;
     }
     closeMobileNav();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- só reage a pathname; closeMobileNav é estável (módulo, não recriada)
   }, [pathname]);
 
   useEffect(() => {
@@ -104,18 +126,33 @@ export function MobileNavDrawer({ children, asideClassName }: { children: ReactN
     };
   }, [isOpen]);
 
+  // Fechado e off-canvas, o painel só está fora da tela (translate) — sem `inert`, o Tab passava
+  // por todos os links invisíveis do menu antes de chegar ao conteúdo.
+  const isHiddenOffCanvas = isOffCanvas && !isOpen;
+  const isModal = isOffCanvas && isOpen;
+
   return (
     <>
-      {isOpen && (
-        <button
-          type="button"
-          aria-label="Fechar navegação"
-          onClick={closeMobileNav}
-          className="fixed inset-0 z-40 bg-popover/80 lg:hidden"
-        />
-      )}
+      {/* Backdrop fica montado e faz fade de opacidade junto com o slide do painel (antes
+          aparecia/sumia de uma vez). Fechado: invisível e sem capturar clique. */}
+      <button
+        type="button"
+        aria-label="Fechar navegação"
+        tabIndex={-1}
+        aria-hidden={!isOpen}
+        onClick={closeMobileNav}
+        className={cn(
+          "fixed inset-0 z-40 bg-popover/80 ui-motion-emphasis lg:hidden",
+          isOpen ? "opacity-100" : "pointer-events-none opacity-0",
+        )}
+      />
       <div
         ref={panelRef}
+        data-shell-region="sidebar"
+        inert={isHiddenOffCanvas}
+        role={isModal ? "dialog" : undefined}
+        aria-modal={isModal ? true : undefined}
+        aria-label={isModal ? "Navegação" : undefined}
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-64 max-w-[85vw] ui-motion-emphasis",
           "lg:static lg:z-auto lg:w-auto lg:max-w-none lg:shrink-0 lg:translate-x-0 lg:transition-none",

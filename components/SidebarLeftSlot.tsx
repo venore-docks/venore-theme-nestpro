@@ -1,23 +1,25 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ChevronLeft, ChevronRight, Globe2, ShieldCheck } from "lucide-react";
-import type { SidebarLeftSlotProps } from "@venore/theme-sdk";
+import { useFormStatus } from "react-dom";
+import { ChevronLeft, ChevronRight, Globe2, Loader2, ShieldCheck, type LucideIcon } from "lucide-react";
+import type { NavItem, SidebarLeftSlotProps } from "@venore/theme-sdk";
 import { cn } from "@venore/theme-sdk/ui";
 import { MobileNavDrawer } from "./MobileNavDrawer";
 import { SidebarNavLink } from "./SidebarNavLink";
+import { HeaderNavLink } from "./HeaderNavLink";
 import { SIDEBAR_COLLAPSE_TOOLTIP_COLLAPSED_CLASSES } from "./sidebar-collapse-tooltip";
 
 // Exclusivo de navegação (main-nav ou admin-nav, conforme navMode) — não é área de widgets. O
 // toggle main-nav/admin-nav mora aqui, não no Header (docs/venore-docks.md — "Shell única"),
-// ANTES da navegação (não depois — pedido desta sessão, e é onde o protótipo de referência
+// ANTES da navegação (é onde o protótipo de referência
 // coloca o SidebarSurfaceSwitch: platform-sidebar.tsx, dentro de um bloco com border-b no topo).
 //
 // Abaixo de lg vira drawer off-canvas (MobileNavDrawer, client) fechado por padrão; a partir de
 // lg volta a ser a coluna fixa de sempre. Colapso (docs/ui/shell-spec.md §3.1-3.2) é exclusivo do
 // desktop: `collapsedFromServer` vem resolvido do cookie no servidor (get-sidebar-collapsed.ts),
 // então a largura certa está presente no primeiro HTML — sem flash de layout pós-hidratação. A
-// partir daí o componente é client e mantém o próprio `useState` (bug desta sessão: o toggle era
+// partir daí o componente é client e mantém o próprio `useState` (o toggle já foi
 // um `<form action={onToggleCollapsed}>` só-servidor — cada clique esperava o round-trip da
 // Server Action pra o cookie voltar lido e só então a classe de largura mudar, então a transição
 // CSS começava num instante que variava com a latência da rede em vez de no clique). Estado local
@@ -27,9 +29,12 @@ import { SIDEBAR_COLLAPSE_TOOLTIP_COLLAPSED_CLASSES } from "./sidebar-collapse-t
 // registrado como "não portar" (docs/ui/shell-spec.md §3.3/§6.3).
 //
 // `<nav>` precisa do próprio `flex-1 min-h-0 overflow-y-auto`: o `<aside>` já preenche a altura
-// inteira (h-full, sem override lg:h-auto — bug desta sessão), mas sem isso o elemento de
+// inteira (h-full, sem override lg:h-auto), mas sem isso o elemento de
 // navegação em si parava do tamanho do conteúdo, deixando espaço vazio abaixo em vez de esticar
 // (e rolar por conta própria se a lista crescer além da viewport).
+//
+// `headerNavItems` não é do contrato de SidebarLeftSlotProps — o Shell deste tema repassa os
+// itens do header-nav, que some abaixo de `md` (HeaderSlot) e reaparece aqui, só no drawer.
 export function SidebarLeftSlot({
   enabled,
   navMode,
@@ -39,7 +44,8 @@ export function SidebarLeftSlot({
   onToggleNavMode,
   collapsed: collapsedFromServer,
   onToggleCollapsed,
-}: SidebarLeftSlotProps) {
+  headerNavItems = [],
+}: SidebarLeftSlotProps & { headerNavItems?: NavItem[] }) {
   const [collapsed, setCollapsed] = useState(collapsedFromServer);
   const [, startTransition] = useTransition();
 
@@ -54,26 +60,39 @@ export function SidebarLeftSlot({
     });
   }
 
+  // Agregador clicado com a sidebar colapsada: os filhos empilhados só como ícones ficavam
+  // ambíguos, então a sidebar expande primeiro e o accordion abre já com os rótulos visíveis.
+  function handleRequestExpand() {
+    if (collapsed) handleToggleCollapsed();
+  }
+
+  const emptyMessage = isAdmin ? "Nenhuma seção administrativa disponível." : "Nenhum item no menu ainda.";
+
   return (
     <MobileNavDrawer
       asideClassName={cn(
         // px-5 é fixo em qualquer breakpoint e em qualquer estado de collapsed — a faixa de
-        // largura do ícone não pode depender da largura do sidebar (bug desta sessão: padding
+        // largura do ícone não pode depender da largura do sidebar (padding
         // não está na lista de propriedades de ui-motion-emphasis, então px-5→px-3 trocava
         // instantaneamente enquanto a largura do <aside> ainda levava 300ms pra terminar,
         // deslocando o ícone antes do fim da transição). Só `width` anima.
-        "relative flex h-full w-full flex-col px-5 py-6 text-foreground shadow-float lg:w-(--sidebar-width-expanded) lg:shrink-0 lg:border-r lg:shadow-none ui-motion-emphasis",
+        "group/aside relative flex h-full w-full flex-col px-5 py-6 text-foreground shadow-float lg:w-(--sidebar-width-expanded) lg:shrink-0 lg:border-r lg:shadow-none ui-motion-emphasis",
         isAdmin ? "border-ring bg-(image:--sidebar-bg-admin)" : "border-border bg-(image:--sidebar-bg)",
         collapsed && "lg:w-(--sidebar-width-collapsed)",
       )}
     >
-      <div className="absolute top-4 right-0 z-10 hidden translate-x-1/2 lg:block">
+      {/* z-50 (não z-10): esse botão flutua pra fora da sidebar (translate-x-1/2) sobre a coluna
+          de conteúdo, onde o HeaderSlot mora — header é sticky com z-40, e com z-10 o header
+          ficava por cima e cortava a seta ao meio. size-11 = alvo de toque mínimo de 44px
+          (docs/ui/shell-spec.md); opacidade reduzida fora do hover/foco da sidebar, porque o
+          botão fica metade sobre o conteúdo e não deve competir com ele. */}
+      <div className="absolute top-4 right-0 z-50 hidden translate-x-1/2 lg:block">
         <button
           type="button"
           onClick={handleToggleCollapsed}
           aria-expanded={!collapsed}
           aria-label={collapsed ? "Expandir barra lateral" : "Colapsar barra lateral"}
-          className="flex size-11 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-panel ui-motion-base outline-none hover:bg-muted hover:border-ring active:border-ring focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex size-11 items-center justify-center rounded-full border border-border bg-card text-foreground opacity-70 shadow-panel ui-motion-base outline-none group-hover/aside:opacity-100 hover:bg-muted hover:border-ring active:border-ring focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring"
         >
           {collapsed ? (
             <ChevronRight className="size-4" aria-hidden="true" />
@@ -101,19 +120,31 @@ export function SidebarLeftSlot({
           canToggleAdminNav ? "pt-2" : "pt-8",
         )}
       >
+        {headerNavItems.length > 0 && (
+          <div className="space-y-1 border-b border-border pb-3 mb-3 md:hidden">
+            {headerNavItems.map((item) => (
+              <HeaderNavLink
+                key={item.key}
+                item={item}
+                className="flex rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground ui-motion-base outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              />
+            ))}
+          </div>
+        )}
+
         {isAdmin
           ? navGroups.map((group) => (
               <div key={group.key} className="space-y-1 pb-4">
                 {/* Título da seção (expandido) e divisor fino (colapsado) ocupam uma faixa de
-                    altura FIXA e sempre presente no flex flow — nunca `hidden`/`block` (bug desta
-                    sessão: display:none tira o elemento do cálculo de layout no mesmo quadro em
+                    altura FIXA e sempre presente no flex flow — nunca `hidden`/`block`
+                    (display:none tira o elemento do cálculo de layout no mesmo quadro em
                     que troca, deslocando os ícones do grupo pra cima antes do <aside> terminar de
                     animar a largura). Título e divisor só fazem crossfade de opacidade por cima
                     um do outro; a altura do bloco nunca muda. */}
                 <div className="relative h-5">
                   <p
                     className={cn(
-                      "absolute inset-0 px-3 pb-1 text-[11px] font-semibold uppercase tracking-caps text-muted-foreground/70 ui-motion-emphasis",
+                      "absolute inset-0 px-3 pb-1 text-xs font-semibold uppercase tracking-caps text-muted-foreground/70 ui-motion-emphasis",
                       collapsed && "lg:opacity-0",
                     )}
                   >
@@ -125,16 +156,17 @@ export function SidebarLeftSlot({
                   />
                 </div>
                 {group.items.map((item) => (
-                  <SidebarNavLink key={item.key} item={item} collapsed={collapsed} isAdmin={isAdmin} />
+                  <SidebarNavLink key={item.key} item={item} collapsed={collapsed} isAdmin={isAdmin} onRequestExpand={handleRequestExpand} />
                 ))}
               </div>
             ))
-          : navItems.map((item) => <SidebarNavLink key={item.key} item={item} collapsed={collapsed} isAdmin={isAdmin} />)}
+          : navItems.map((item) => (
+              <SidebarNavLink key={item.key} item={item} collapsed={collapsed} isAdmin={isAdmin} onRequestExpand={handleRequestExpand} />
+            ))}
 
-        {isAdmin && navGroups.length === 0 && (
-          <p className="px-3 text-sm text-muted-foreground/56">—</p>
+        {(isAdmin ? navGroups.length === 0 : navItems.length === 0) && (
+          <p className={cn("px-3 text-sm text-muted-foreground/56", collapsed && "lg:sr-only")}>{emptyMessage}</p>
         )}
-        {!isAdmin && navItems.length === 0 && <p className="px-3 text-sm text-muted-foreground/56">—</p>}
       </nav>
     </MobileNavDrawer>
   );
@@ -158,16 +190,7 @@ function SidebarSurfaceSwitch({
           collapsed=true, por isso este bloco só aparece via `lg:flex` quando de fato colapsada,
           nunca por padrão (mobile-first). */}
       <form action={onToggleNavMode} className={cn("hidden justify-center", collapsed && "lg:flex")}>
-        <button
-          type="submit"
-          aria-label={label}
-          className="group/sidebar-collapse-target relative flex size-11 items-center justify-center rounded-xl border border-border bg-muted text-foreground shadow-panel ui-motion-base outline-none hover:border-ring active:border-ring focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          {isAdmin ? <ShieldCheck className="size-4" aria-hidden="true" /> : <Globe2 className="size-4" aria-hidden="true" />}
-          <span className={cn("max-w-0 overflow-hidden whitespace-nowrap opacity-0", SIDEBAR_COLLAPSE_TOOLTIP_COLLAPSED_CLASSES)}>
-            {label}
-          </span>
-        </button>
+        <NavModeIconButton isAdmin={isAdmin} label={label} />
       </form>
 
       {/* Pill de dois segmentos — versão padrão (mobile e desktop expandido); some só em
@@ -185,31 +208,68 @@ function SidebarSurfaceSwitch({
           isAdmin ? "left-[calc(50%+0.125rem)]" : "left-1",
         )}
       />
-      <button
-        type="submit"
-        disabled={!isAdmin}
-        aria-current={!isAdmin ? true : undefined}
-        className={cn(
-          "relative z-10 flex h-9 items-center justify-center gap-2 rounded-lg text-xs font-semibold uppercase tracking-caps ui-motion-base outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default",
-          !isAdmin ? "text-foreground" : "text-muted-foreground hover:text-foreground",
-        )}
-      >
-        <Globe2 className="size-4" aria-hidden="true" />
-        Site
-      </button>
-      <button
-        type="submit"
-        disabled={isAdmin}
-        aria-current={isAdmin ? true : undefined}
-        className={cn(
-          "relative z-10 flex h-9 items-center justify-center gap-2 rounded-lg text-xs font-semibold uppercase tracking-caps ui-motion-base outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default",
-          isAdmin ? "text-foreground" : "text-muted-foreground hover:text-foreground",
-        )}
-      >
-        <ShieldCheck className="size-4" aria-hidden="true" />
-        Admin
-      </button>
+      <NavModeSegmentButton isActive={!isAdmin} icon={Globe2} text="Site" />
+      <NavModeSegmentButton isActive={isAdmin} icon={ShieldCheck} text="Admin" />
       </form>
     </>
+  );
+}
+
+// A troca de navMode depende de um round-trip de Server Action (cookie só é lido no próximo
+// render do RootLayout — get-nav-mode.ts — então, ao contrário do colapso, não dá pra flipar a
+// navegação otimisticamente no client: navItems/navGroups vêm do servidor já filtrados pelo modo
+// atual). useFormStatus() (react-dom) dá o pending do <form> mais próximo de graça, sem estado
+// extra — troca o ícone do botão alvo (o clicável) por um spinner e trava a interação até o
+// refresh da rota devolver os dados do novo modo, pra latência de rede (notada em instâncias
+// Vercel) parecer carregamento em vez de UI travada.
+function NavModeIconButton({ isAdmin, label }: { isAdmin: boolean; label: string }) {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      type="submit"
+      aria-label={label}
+      aria-busy={pending}
+      disabled={pending}
+      className={cn(
+        "group/sidebar-collapse-target relative flex size-11 items-center justify-center rounded-xl border border-border bg-muted text-foreground shadow-panel ui-motion-base outline-none hover:border-ring active:border-ring focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait",
+        !pending && "cursor-pointer",
+      )}
+    >
+      {pending ? (
+        <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+      ) : isAdmin ? (
+        <ShieldCheck className="size-4" aria-hidden="true" />
+      ) : (
+        <Globe2 className="size-4" aria-hidden="true" />
+      )}
+      <span className={cn("max-w-0 overflow-hidden whitespace-nowrap opacity-0", SIDEBAR_COLLAPSE_TOOLTIP_COLLAPSED_CLASSES)}>
+        {label}
+      </span>
+    </button>
+  );
+}
+
+function NavModeSegmentButton({ isActive, icon: Icon, text }: { isActive: boolean; icon: LucideIcon; text: string }) {
+  const { pending } = useFormStatus();
+  // O segmento inativo é o alvo do clique (o toggle sempre inverte o modo atual) — só ele vira
+  // spinner; o já-ativo permanece com o próprio ícone porque não é ele que está "carregando".
+  const isTarget = !isActive;
+
+  return (
+    <button
+      type="submit"
+      disabled={isActive || pending}
+      aria-current={isActive ? true : undefined}
+      aria-busy={isTarget && pending ? true : undefined}
+      className={cn(
+        "relative z-10 flex h-9 items-center justify-center gap-2 rounded-lg text-xs font-semibold uppercase tracking-caps ui-motion-base outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default",
+        isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+        isTarget && !pending && "cursor-pointer",
+      )}
+    >
+      {isTarget && pending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <Icon className="size-4" aria-hidden="true" />}
+      {text}
+    </button>
   );
 }
