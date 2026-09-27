@@ -1,0 +1,21 @@
+# Revisão do tema NestPro — 2. Recursos que fazem falta
+
+Revisão de 27/09/2026 sobre `main` @ `d9c3cdb`, comparada ao core `venore-docks` v0.6.0.
+Legenda: **[CERTAIN]** verificado · **[LIKELY]** inferência · **[UNCERTAIN]** hipótese.
+
+Documentos irmãos: [1. Problemas](01-problemas.md) · [3. Melhorias de UX](03-melhorias-ux.md).
+
+| # | Prioridade | Recurso | Por que faz falta | Como poderia ser | Confiança |
+|---|---|---|---|---|---|
+| R1 | Alta | Testes de componente | O repositório não tem nenhum teste. O Slime do core tem testes de `HeaderSlot`, `SidebarLeftSlot` e `Breadcrumbs` que pegariam P2, P3 e P6. | Portar os três testes do Slime, adaptando os imports para `@venore/theme-sdk`, e rodar pelo `npm run test:plugins`/equivalente de temas do core ou por um Vitest próprio. | [CERTAIN] |
+| R2 | Alta | CI com lint e typecheck | Sem CI, o tema só quebra quando uma instância faz bump. As regras de cor e fronteira do core não valem aqui. | Adicionar um workflow com `tsc --noEmit` contra os tipos do `@venore/theme-sdk` e ESLint com as mesmas regras `no-restricted-syntax` de cor do core. | [CERTAIN] |
+| R3 | Média | Processo de sincronização com o Venore Slime | O tema se declara "cópia do Slime (mesmo Shell)", mas nada avisa quando o Slime muda. Todos os problemas P2 a P6 vêm disso. | Registrar no README de qual commit do Slime o tema foi copiado e checar o diff a cada release do core (um script `diff` contra `src/themes/venore-slime/components` já basta). Outra saída é o core exportar o Shell do Slime via `@venore/theme-sdk` e o NestPro só trocar o `theme.css`. | [CERTAIN] a deriva · [LIKELY] a solução |
+| R4 | Média | Acesso à busca no header | O core tem a rota `/busca`, mas o header do NestPro não tem campo nem ícone de busca. | Ícone de lupa no header que leva a `/busca` (ou abre um campo), sem buscar dado no tema. O ideal é o core expor `searchHref` no contrato. | [CERTAIN] rota existe · [LIKELY] valor |
+| R5 | Média | Contador no alerta de notificação | `notificationAlert.count` chega no contrato e é ignorado. Só aparece o ponto pulsante e o `label`. | Badge numérico (`9+` acima de 9) ao lado do ponto, também como `aria-label` ("3 notificações"). | [CERTAIN] |
+| R6 | Média | Link "Pular para o conteúdo" | Com header alto e sidebar longa, quem navega por teclado precisa passar por todos os itens do menu antes do conteúdo. | Link `sr-only focus:not-sr-only` no início do `Shell` apontando para `<main id="conteudo">`. | [CERTAIN] ausente |
+| R7 | Média | Identidade própria do NestPro | O `theme.css` diz que é uma "refatoração parcial": mesmo raio, motion, tipografia e Shell do Slime, só o matiz muda. Não há fonte, raio ou composição que lembre o NestPro original (`#leftbar` fixo, "Delft blue" `hsl(235 25% 30%)`). | Definir a fase 2: tipografia própria (variável de fonte no tema), a sidebar escura do NestPro original como opção e um raio mais reto. | [CERTAIN] é parcial · [UNCERTAIN] quanto do original o cliente quer de volta |
+| R8 | Baixa | Uso de `brandAesthetics.color` | O manifesto declara `color: oklch(0.5 0.135 235)`, mas nenhum componente do tema usa `brand.color` (o traço do rodapé é `bg-primary/40`). | Usar `brand.color` no traço de acento do rodapé, como o comentário de `FooterSlot.tsx` já promete, ou remover a promessa. | [CERTAIN] |
+| R9 | Baixa | README e CHANGELOG | Não há documentação de instalação, das capacidades suportadas nem do histórico de tags. Hoje a única pista do que mudou entre `v0.1.2` e `v0.2.1` é o `git log`. | README curto (instalação, prévia, capacidades, relação com o Slime) e CHANGELOG por tag. | [CERTAIN] |
+| R10 | Baixa | Paletas próprias | `NESTPRO_COLOR_PALETTES` só gira o matiz a partir do azul (`generateHueRotationPalettes`). Não há variantes que façam sentido para a marca (azul institucional mais sóbrio, alto contraste). | Duas ou três paletas curadas além dos presets de rotação. | [CERTAIN] |
+| R11 | Baixa | Estilos de impressão | Imprimir uma página (comum em conteúdo institucional) sai com header, sidebar e rodapé. | Bloco `@media print` no `theme.css` escondendo a casca e usando fundo branco. | [LIKELY] |
+| R12 | Baixa | Link no crédito do rodapé | "Venore Docks" no rodapé é texto puro. | Transformar em link para o site do projeto, com `rel="noopener"`. | [CERTAIN] |
